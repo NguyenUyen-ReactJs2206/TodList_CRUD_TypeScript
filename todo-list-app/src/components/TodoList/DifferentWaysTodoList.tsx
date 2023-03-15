@@ -4,19 +4,28 @@ import TaskInput from '../TaskInput/TaskInput'
 import TaskList from '../TaskList/TaskList'
 import styles from './todoList.module.scss'
 
-export default function TodoList() {
+// interface HandleNewTodos {
+//   (todos: Todo[]): Todo[]
+// }
+
+type HandleNewTodos = (todos: Todo[]) => Todo[]
+
+const syncReactToLocal = (handleNewTodos: HandleNewTodos) => {
+  const todosString = localStorage.getItem('todos')
+  const todosObj: Todo[] = JSON.parse(todosString || '[]')
+  const newTodosObj = handleNewTodos(todosObj)
+  localStorage.setItem('todos', JSON.stringify(newTodosObj))
+}
+
+export default function DifferentWaysTodoList() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [currentTodo, setCurrentTodo] = useState<Todo | null>(null)
   const doneTodos = todos.filter((todo) => todo.done)
   const notDoneTodos = todos.filter((todo) => !todo.done)
 
-  //when reset: keep the list todo
   useEffect(() => {
-    //read items
-    const todostring = localStorage.getItem('todos')
-    //parse JSON->Object
-    const todosObj: Todo[] = JSON.parse(todostring || '[]')
-    console.log('todosObj', todosObj)
+    const todosString = localStorage.getItem('todos')
+    const todosObj: Todo[] = JSON.parse(todosString || '[]')
     setTodos(todosObj)
   }, [])
 
@@ -27,13 +36,7 @@ export default function TodoList() {
       id: new Date().toISOString()
     }
     setTodos((prev) => [...prev, todo])
-    //read items
-    const todostring = localStorage.getItem('todos')
-    //parse JSON->Object
-    const todosObj: Todo[] = JSON.parse(todostring || '[]')
-    const newTodosObj = [...todosObj, todo]
-    // More items -- JSON.stringify: object->string
-    localStorage.setItem('todos', JSON.stringify(newTodosObj))
+    syncReactToLocal((todosObj: Todo[]) => [...todosObj, todo])
   }
 
   const handleDoneTodo = (id: string, done: boolean) => {
@@ -62,62 +65,36 @@ export default function TodoList() {
   }
 
   const finishEditTodo = () => {
-    setTodos((prev) => {
-      return prev.map((todo) => {
+    const handler = (todoObj: Todo[]) => {
+      return todoObj.map((todo) => {
         if (todo.id === (currentTodo as Todo).id) {
           return currentTodo as Todo
         }
         return todo
       })
-    })
+    }
+    setTodos(handler)
     setCurrentTodo(null)
-
-    const todostring = localStorage.getItem('todos')
-    //parse JSON->Object
-    const todosObj: Todo[] = JSON.parse(todostring || '[]')
-
-    const newTodosObj = todosObj.map((todo) => {
-      if (todo.id === (currentTodo as Todo).id) {
-        return currentTodo as Todo
-      }
-      return todo
-    })
-    // More items -- JSON.stringify: object->string
-    localStorage.setItem('todos', JSON.stringify(newTodosObj))
+    syncReactToLocal(handler)
   }
 
   const deleteTodo = (id: string) => {
     if (currentTodo) {
       setCurrentTodo(null)
     }
-    setTodos((prev) => {
-      const findedIndexTodo = prev.findIndex((todo) => todo.id === id)
+    const handler = (todoObj: Todo[]) => {
+      const findedIndexTodo = todoObj.findIndex((todo) => todo.id === id)
       if (findedIndexTodo > -1) {
-        //Clone
-        const result = [...prev]
+        const result = [...todoObj]
         result.splice(findedIndexTodo, 1)
         return result
       }
-      return prev
-    })
-
-    const todostring = localStorage.getItem('todos')
-    //parse JSON->Object
-    const todosObj: Todo[] = JSON.parse(todostring || '[]')
-    const newTodosObj = () => {
-      const findedIndexTodo = todosObj.findIndex((todo) => todo.id === id)
-      if (findedIndexTodo > -1) {
-        const result = [...todosObj]
-        console.log('result', result)
-        result.splice(findedIndexTodo, 1)
-        return result
-      }
-      return todosObj
+      return todoObj
     }
-    console.log('newwwTodo', newTodosObj())
-    localStorage.setItem('todos', JSON.stringify(newTodosObj()))
+    setTodos(handler)
+    syncReactToLocal(handler)
   }
-  // console.log('todos', todos)
+
   return (
     <div className={styles.todoList}>
       <div className={styles.todoListContainer}>
