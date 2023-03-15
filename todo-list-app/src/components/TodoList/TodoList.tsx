@@ -7,7 +7,6 @@ import styles from './todoList.module.scss'
 export default function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [currentTodo, setCurrentTodo] = useState<Todo | null>(null)
-
   const doneTodos = todos.filter((todo) => todo.done)
   const notDoneTodos = todos.filter((todo) => !todo.done)
 
@@ -56,6 +55,22 @@ export default function TodoList() {
     })
     setCurrentTodo(null)
   }
+
+  const deleteTodo = (id: string) => {
+    if (currentTodo) {
+      setCurrentTodo(null)
+    }
+    setTodos((prev) => {
+      const findedIndexTodo = prev.findIndex((todo) => todo.id === id)
+      if (findedIndexTodo > -1) {
+        //Clone
+        const result = [...prev]
+        result.splice(findedIndexTodo, 1)
+        return result
+      }
+      return prev
+    })
+  }
   console.log('todos', todos)
   return (
     <div className={styles.todoList}>
@@ -66,14 +81,14 @@ export default function TodoList() {
           todos={notDoneTodos}
           handleDoneTodo={handleDoneTodo}
           startEditTodo={startEditTodo}
-          editTodo={editTodo}
+          deleteTodo={deleteTodo}
         />
         <TaskList
           doneTaskList
           todos={doneTodos}
           handleDoneTodo={handleDoneTodo}
           startEditTodo={startEditTodo}
-          editTodo={editTodo}
+          deleteTodo={deleteTodo}
         />
       </div>
     </div>

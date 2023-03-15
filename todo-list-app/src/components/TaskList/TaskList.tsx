@@ -7,11 +7,11 @@ interface TaskListProps {
   todos: Todo[]
   handleDoneTodo: (id: string, done: boolean) => void
   startEditTodo: (id: string) => void
-  editTodo: (name: string) => void
+  deleteTodo: (id: string) => void
 }
 
 export default function TaskList(props: TaskListProps) {
-  const { doneTaskList, todos, handleDoneTodo, startEditTodo, editTodo } = props
+  const { doneTaskList, todos, handleDoneTodo, startEditTodo, deleteTodo } = props
 
   // // use currying
   // const onChangeCheckbox = (idTodo: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +37,7 @@ export default function TaskList(props: TaskListProps) {
               <button className={styles.taskBtn} onClick={() => startEditTodo(todo.id)}>
                 🖊️
               </button>
-              <button className={styles.taskBtn} onClick={() => editTodo(todo.id)}>
+              <button className={styles.taskBtn} onClick={() => deleteTodo(todo.id)}>
                 🗑️
               </button>
             </div>
