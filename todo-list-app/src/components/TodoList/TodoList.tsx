@@ -35,7 +35,6 @@ export default function TodoList() {
     // More items -- JSON.stringify: object->string
     localStorage.setItem('todos', JSON.stringify(newTodosObj))
   }
-
   const handleDoneTodo = (id: string, done: boolean) => {
     setTodos((prev) => {
       return prev.map((todo) => {
@@ -45,6 +44,16 @@ export default function TodoList() {
         return todo
       })
     })
+    const todostring = localStorage.getItem('todos')
+    const todosObj: Todo[] = JSON.parse(todostring || '[]')
+    const newTodosObj = todosObj.map((todo) => {
+      if (todo.id === id) {
+        return { ...todo, done }
+      }
+      return todo
+    })
+    // More items -- JSON.stringify: object->string
+    localStorage.setItem('todos', JSON.stringify(newTodosObj))
   }
 
   const startEditTodo = (id: string) => {
@@ -130,7 +139,7 @@ export default function TodoList() {
           deleteTodo={deleteTodo}
         />
         <TaskList
-          doneTaskList
+          doneTaskList={true}
           todos={doneTodos}
           handleDoneTodo={handleDoneTodo}
           startEditTodo={startEditTodo}
